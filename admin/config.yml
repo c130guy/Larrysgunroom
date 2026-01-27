@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: c130guy/Larrysgunroom
   branch: main
 
 media_folder: "images"
