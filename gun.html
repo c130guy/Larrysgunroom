@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Firearm Details | Larry’s Gun Room</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a href="/" style="display:block; margin:20px;">← Back to Inventory</a>
+
+<main id="gun">
+  <p>Loading firearm details…</p>
+</main>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug");
+
+  const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
+
+  fetch(sheetURL)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.trim().split("\n").slice(1);
+      const data = rows.map(r => r.split(","));
+
+      const match = data.find(row => row[5] === slug);
+
+      if (!match) {
+        document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
+        return;
+      }
+
+      const [id, name, price, status, image, image2, image3] = match;
+
+      let badge = "";
+      if (status && status !== "AVAILABLE") {
+        badge = `<div class="badge ${status.toLowerCase().replace(" ", "-")}">${status}</div>`;
+      }
+
+      const images = [image, image2, image3]
+        .filter(Boolean)
+        .map(img => `<img src="${img}" style="max-width:300px; margin:10px;">`)
+        .join("");
+
+      document.getElementById("gun").innerHTML = `
+        <h1>${name}</h1>
+        ${badge}
+        <p class="price">$${price}</p>
+        <div>${images}</div>
+      `;
+    })
+    .catch(() => {
+      document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
+    });
+</script>
+
+</body>
+</html>
