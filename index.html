@@ -62,14 +62,16 @@ fetch(sheetURL)
     container.innerHTML = "";
 
     rows.forEach(row => {
-      const [id, name, price, status, image] = row.split(",");
+  const name = row[1];
+  const price = row[2];
+  const status = row[3];
+  const image = row[4];
+  const slug = row[7];
 
-      if (!name) return;
-
-      let badge = "";
-      if (status && status !== "AVAILABLE") {
-        badge = `<div class="badge ${status.toLowerCase().replace(" ", "-")}">${status}</div>`;
-      }
+  if (status === 'AVAILABLE') {
+    // render the card
+  }
+});
 
 const slug = r.c[5]?.v;   // new column in Google Sheets
 const url = slug ? `/gun.html?slug=${slug}` : "#";
