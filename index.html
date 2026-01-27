@@ -52,34 +52,6 @@
 </footer>
 
 <script>
-fetch('/content/inventory.json')
-  .then(response => response.json())
-  .then(items => {
-    const container = document.getElementById('inventory');
-
-    items.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'item-card';
-
-      let badge = '';
-      if (item.status !== 'AVAILABLE') {
-        badge = `<div class="badge ${item.status.toLowerCase().replace(' ', '-')}">${item.status}</div>`;
-      }
-
-      card.innerHTML = `
-        <div class="image-wrapper">
-          ${badge}
-          <img src="${item.image}" alt="${item.name}">
-        </div>
-        <h3>${item.name}</h3>
-        <p class="price">${item.price}</p>
-      `;
-
-      container.appendChild(card);
-    });
-  })
-  .catch(err => console.error('Inventory load error:', err));
-</script>
 
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/gviz/tq?tqx=out:json";
