@@ -71,8 +71,13 @@ fetch(sheetURL)
         badge = `<div class="badge ${status.toLowerCase().replace(" ", "-")}">${status}</div>`;
       }
 
-      const card = document.createElement("div");
-      card.className = "item-card";
+const slug = r.c[5]?.v;   // new column in Google Sheets
+const url = slug ? `/gun.html?slug=${slug}` : "#";
+
+const card = document.createElement("a");
+card.href = url;
+card.className = "item-card";
+
       card.innerHTML = `
         <div class="image-wrapper">
           ${badge}
