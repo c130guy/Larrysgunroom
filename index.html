@@ -46,39 +46,33 @@
 </section>
 
 <section id="inventory" class="inventory-grid"></section>
-  
+
 <footer>
   <p>© Larry’s Gun Room, LLC — Beresford, South Dakota</p>
 </footer>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/gviz/tq?tqx=out:json";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
 fetch(sheetURL)
   .then(res => res.text())
-  .then(text => {
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    const rows = json.table.rows;
-
+  .then(csv => {
+    const rows = csv.trim().split("\n").slice(1);
     const container = document.getElementById("inventory");
     container.innerHTML = "";
 
-    rows.forEach(r => {
-      if (!r.c[1]) return;
+    rows.forEach(row => {
+      const [id, name, price, status, image] = row.split(",");
 
-      const name = r.c[1].v;
-      const price = r.c[2].v;
-      const status = r.c[3].v;
-      const image = r.c[4].v;
-
-      const card = document.createElement("div");
-      card.className = "item-card";
+      if (!name) return;
 
       let badge = "";
-      if (status !== "AVAILABLE") {
+      if (status && status !== "AVAILABLE") {
         badge = `<div class="badge ${status.toLowerCase().replace(" ", "-")}">${status}</div>`;
       }
 
+      const card = document.createElement("div");
+      card.className = "item-card";
       card.innerHTML = `
         <div class="image-wrapper">
           ${badge}
@@ -91,7 +85,7 @@ fetch(sheetURL)
       container.appendChild(card);
     });
   })
-  .catch(err => console.error("Inventory error:", err));
+  .catch(err => console.error("Inventory CSV error:", err));
 </script>
   
 </body>
