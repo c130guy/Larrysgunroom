@@ -137,6 +137,53 @@ footer {
   font-size: 1.1rem;
 }
 
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.item-card {
+  text-align: center;
+  border: 1px solid #ddd;
+  padding: 15px;
+  position: relative;
+}
+
+.image-wrapper {
+  position: relative;
+}
+
+.item-card img {
+  max-width: 100%;
+  height: auto;
+}
+
+.price {
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 6px 10px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.8em;
+  z-index: 10;
+}
+
+.badge.sold {
+  background: #b00000;
+}
+
+.badge.on-hold {
+  background: #d48b00;
+}
+
 .item p {
   font-size: 0.95rem;
   color: #444;
