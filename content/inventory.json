@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Winchester Model 1894",
+    "price": "$1,295",
+    "status": "AVAILABLE",
+    "image": "/images/item1.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Colt Single Action Army",
+    "price": "$3,750",
+    "status": "SOLD",
+    "image": "/images/item2.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Remington 700 BDL",
+    "price": "$895",
+    "status": "ON HOLD",
+    "image": "/images/item3.jpg"
+  }
+]
