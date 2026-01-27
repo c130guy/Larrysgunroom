@@ -48,6 +48,8 @@
 <section class="featured">
   <h2>Featured Firearms</h2>
 
+<section id="inventory" class="inventory-grid"></section>
+ 
   <div class="featured-grid">
 
     <div class="item">
@@ -100,5 +102,35 @@
   <p>© Larry’s Gun Room, LLC — Beresford, South Dakota</p>
 </footer>
 
+<script>
+fetch('/content/inventory.json')
+  .then(response => response.json())
+  .then(items => {
+    const container = document.getElementById('inventory');
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+
+      let badge = '';
+      if (item.status !== 'AVAILABLE') {
+        badge = `<div class="badge ${item.status.toLowerCase().replace(' ', '-')}">${item.status}</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="image-wrapper">
+          ${badge}
+          <img src="${item.image}" alt="${item.name}">
+        </div>
+        <h3>${item.name}</h3>
+        <p class="price">${item.price}</p>
+      `;
+
+      container.appendChild(card);
+    });
+  })
+  .catch(err => console.error('Inventory load error:', err));
+</script>
+  
 </body>
 </html>
