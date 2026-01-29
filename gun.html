@@ -25,7 +25,7 @@
       const rows = csv.trim().split("\n").slice(1);
       const data = rows.map(r => r.split(","));
 
-      const match = data.find(row => row[5] === slug);
+      const match = data.find(row => row[7]?.trim() === slug?.trim());
 
       if (!match) {
         document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
