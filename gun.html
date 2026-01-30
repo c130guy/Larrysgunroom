@@ -14,49 +14,46 @@
 </main>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
 
-  const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
-  fetch(sheetURL)
-    .then(res => res.text())
-    .then(csv => {
-      const rows = csv.trim().split("\n").slice(1);
-      const data = rows.map(r => r.split(","));
+fetch(sheetURL)
+  .then(res => res.text())
+  .then(csv => {
+    const rows = csv.trim().split("\n").slice(1).map(r => r.split(","));
+    const match = rows.find(r => r[0].trim() === id.trim());
 
-      const match = data.find(row => row[7] === slug);
+    if (!match) {
+      document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
+      return;
+    }
 
-if (!match) {
-  document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
-  return;
-}
+    const name   = match[1];
+    const price  = match[2];
+    const status = match[3];
 
-const id     = match[0];
-const name   = match[1];
-const price  = match[2];
-const status = match[3];
+    let badge = "";
+    if (status && status !== "AVAILABLE") {
+      badge = `<div class="badge ${status.toLowerCase()}">${status}</div>`;
+    }
 
-let badge = "";
-if (status && status !== "AVAILABLE") {
-  badge = `<div class="badge ${status.toLowerCase()}">${status}</div>`;
-}
+    const images = [match[6], match[8], match[9]]
+      .filter(img => img && img.startsWith("http"))
+      .map(img => `<img src="${img}" style="max-width:300px; margin:10px;">`)
+      .join("");
 
-const images = [match[6], match[8], match[9]]
-  .filter(img => img && img.startsWith("http"))
-  .map(img => `<img src="${img}" style="max-width:300px; margin:10px;">`)
-  .join("");
-
-document.getElementById("gun").innerHTML = `
-  <h1>${name}</h1>
-  ${badge}
-  <p class="price">$${price}</p>
-  <div>${images}</div>
-`;
-    })
-    .catch(() => {
-      document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
-    });
+    document.getElementById("gun").innerHTML = `
+      <h1>${name}</h1>
+      ${badge}
+      <p class="price">$${price}</p>
+      <div>${images}</div>
+    `;
+  })
+  .catch(() => {
+    document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
+  });
 </script>
 
 </body>
