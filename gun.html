@@ -15,12 +15,19 @@
 </main>
 
 <script>
-/* ========= CONFIG (EDIT THESE TWO LINES ONLY) ========= */
+/* ==================================================
+   CONFIG — EDIT **ONLY** THE API KEY LINE BELOW
+   ================================================== */
 
-var SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
-var API_KEY   = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+var SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
-/* ========= DO NOT EDIT BELOW THIS LINE ========= */
+/* 🔑 PASTE YOUR **NEWLY ROTATED** API KEY HERE */
+var API_KEY = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+
+/* ==================================================
+   DO NOT EDIT ANYTHING BELOW THIS LINE
+   ================================================== */
 
 var params = new URLSearchParams(window.location.search);
 var id = params.get("id");
@@ -82,7 +89,9 @@ if (!id) {
         if (data.files && data.files.length) {
           data.files.forEach(function(f) {
             imagesHTML +=
-              "<img src='https://drive.google.com/uc?export=view&id=" + f.id + "' style='max-width:300px;margin:10px;'>";
+              "<img src='https://drive.google.com/thumbnail?id=" +
+              f.id +
+              "&sz=w1000' style='max-width:300px;margin:10px;'>";
           });
         } else {
           imagesHTML = "<em>No photos found in folder.</em>";
@@ -112,3 +121,4 @@ if (!id) {
 
 </body>
 </html>
+
