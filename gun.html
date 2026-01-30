@@ -15,302 +15,102 @@
 </main>
 
 <script>
-/* =========================
-   CONFIG — YOU EDIT THESE
-   ========================= */
+/* ========= CONFIG (EDIT THESE TWO LINES ONLY) ========= */
 
-const sheetURL = "<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Firearm Details | Larry’s Gun Room</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+var SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
+var API_KEY   = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
 
-<a href="/" style="display:block; margin:20px;">← Back to Inventory</a>
+/* ========= DO NOT EDIT BELOW THIS LINE ========= */
 
-<main id="gun">
-  <p>Loading firearm details…</p>
-</main>
-
-<script>
-/* =========================
-   CONFIG — YOU EDIT THESE
-   ========================= */
-
-const sheetURL = "<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Firearm Details | Larry’s Gun Room</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<a href="/" style="display:block; margin:20px;">← Back to Inventory</a>
-
-<main id="gun">
-  <p>Loading firearm details…</p>
-</main>
-
-<script>
-/* =========================
-   CONFIG — YOU EDIT THESE
-   ========================= */
-
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
-const API_KEY  = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
-
-/* =========================
-   DO NOT EDIT BELOW THIS
-   ========================= */
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+var params = new URLSearchParams(window.location.search);
+var id = params.get("id");
 
 if (!id) {
   document.getElementById("gun").innerHTML = "<p>Invalid firearm link.</p>";
-  throw new Error("No ID provided");
-}
+} else {
 
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(csv => {
-    const rows = csv.trim().split("\n").slice(1).map(r => r.split(","));
-    const gun = rows.find(r => r[0].trim() === id.trim());
+  fetch(SHEET_URL)
+    .then(function(res) { return res.text(); })
+    .then(function(csv) {
 
-    if (!gun) {
-      document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
-      return;
-    }
+      var rows = csv.trim().split("\n").slice(1).map(function(r) {
+        return r.split(",");
+      });
 
-    const name    = gun[1];
-    const price   = gun[2];
-    const status  = gun[3];
-    const details = gun[4];
-    const folderURL = gun[5];
+      var gun = rows.find(function(r) {
+        return r[0].trim() === id.trim();
+      });
 
-    if (!folderURL) {
-      document.getElementById("gun").innerHTML = `
-        <h1>${name}</h1>
-        <p class="price">$${price}</p>
-        <p>${details}</p>
-        <p><em>No photos available.</em></p>
-      `;
-      return;
-    }
+      if (!gun) {
+        document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
+        return;
+      }
 
-    const folderIdMatch = folderURL.match(/[-\w]{25,}/);
-    if (!folderIdMatch) {
-      document.getElementById("gun").innerHTML = "<p>Invalid photo folder link.</p>";
-      return;
-    }
+      var name    = gun[1];
+      var price   = gun[2];
+      var status  = gun[3];
+      var details = gun[4];
+      var folderURL = gun[5];
 
-    const folderId = folderIdMatch[0];
+      if (!folderURL) {
+        document.getElementById("gun").innerHTML =
+          "<h1>" + name + "</h1>" +
+          "<p class='price'>$" + price + "</p>" +
+          "<p>" + details + "</p>" +
+          "<p><em>No photos available.</em></p>";
+        return;
+      }
 
-    fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name)&key=${API_KEY}`
-    )
-      .then(res => res.json())
-      .then(data => {
-        const images = (data.files || [])
-          .map(f => `<img src="https://drive.google.com/uc?id=${f.id}" style="max-width:300px;margin:10px;">`)
-          .join("");
+      var match = folderURL.match(/[-\w]{25,}/);
+      if (!match) {
+        document.getElementById("gun").innerHTML = "<p>Invalid photo folder link.</p>";
+        return;
+      }
 
-        let badge = "";
-        if (status && status !== "AVAILABLE") {
-          badge = `<div class="badge ${status.toLowerCase()}">${status}</div>`;
+      var folderId = match[0];
+
+      fetch(
+        "https://www.googleapis.com/drive/v3/files?q='" +
+        folderId +
+        "'+in+parents&fields=files(id,name)&key=" +
+        API_KEY
+      )
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+
+        var imagesHTML = "";
+        if (data.files && data.files.length) {
+          data.files.forEach(function(f) {
+            imagesHTML +=
+              "<img src='https://drive.google.com/uc?id=" +
+              f.id +
+              "' style='max-width:300px;margin:10px;'>";
+          });
+        } else {
+          imagesHTML = "<em>No photos found in folder.</em>";
         }
 
-        document.getElementById("gun").innerHTML = `
-          <h1>${name}</h1>
-          ${badge}
-          <p class="price">$${price}</p>
-          <p>${details}</p>
-          <div>${images || "<em>No photos found in folder.</em>"}</div>
-        `;
-      })
-      .catch(() => {
-        document.getElementById("gun").innerHTML = "<p>Error loading photos.</p>";
-      });
-  })
-  .catch(() => {
-    document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
-  });
-</script>
-
-</body>
-</html>
-";
-const API_KEY  = "PASTE_YOUR_NEW_LOCKED_API_KEY_HERE";
-
-/* =========================
-   DO NOT EDIT BELOW THIS
-   ========================= */
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-
-if (!id) {
-  document.getElementById("gun").innerHTML = "<p>Invalid firearm link.</p>";
-  throw new Error("No ID provided");
-}
-
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(csv => {
-    const rows = csv.trim().split("\n").slice(1).map(r => r.split(","));
-    const gun = rows.find(r => r[0].trim() === id.trim());
-
-    if (!gun) {
-      document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
-      return;
-    }
-
-    const name    = gun[1];
-    const price   = gun[2];
-    const status  = gun[3];
-    const details = gun[4];
-    const folderURL = gun[5];
-
-    if (!folderURL) {
-      document.getElementById("gun").innerHTML = `
-        <h1>${name}</h1>
-        <p class="price">$${price}</p>
-        <p>${details}</p>
-        <p><em>No photos available.</em></p>
-      `;
-      return;
-    }
-
-    const folderIdMatch = folderURL.match(/[-\w]{25,}/);
-    if (!folderIdMatch) {
-      document.getElementById("gun").innerHTML = "<p>Invalid photo folder link.</p>";
-      return;
-    }
-
-    const folderId = folderIdMatch[0];
-
-    fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name)&key=${API_KEY}`
-    )
-      .then(res => res.json())
-      .then(data => {
-        const images = (data.files || [])
-          .map(f => `<img src="https://drive.google.com/uc?id=${f.id}" style="max-width:300px;margin:10px;">`)
-          .join("");
-
-        let badge = "";
+        var badgeHTML = "";
         if (status && status !== "AVAILABLE") {
-          badge = `<div class="badge ${status.toLowerCase()}">${status}</div>`;
+          badgeHTML = "<div class='badge'>" + status + "</div>";
         }
 
-        document.getElementById("gun").innerHTML = `
-          <h1>${name}</h1>
-          ${badge}
-          <p class="price">$${price}</p>
-          <p>${details}</p>
-          <div>${images || "<em>No photos found in folder.</em>"}</div>
-        `;
+        document.getElementById("gun").innerHTML =
+          "<h1>" + name + "</h1>" +
+          badgeHTML +
+          "<p class='price'>$" + price + "</p>" +
+          "<p>" + details + "</p>" +
+          "<div>" + imagesHTML + "</div>";
       })
-      .catch(() => {
+      .catch(function() {
         document.getElementById("gun").innerHTML = "<p>Error loading photos.</p>";
       });
-  })
-  .catch(() => {
-    document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
-  });
-</script>
-
-</body>
-</html>
-";
-const API_KEY  = "PASTE_YOUR_NEW_LOCKED_API_KEY_HERE";
-
-/* =========================
-   DO NOT EDIT BELOW THIS
-   ========================= */
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-
-if (!id) {
-  document.getElementById("gun").innerHTML = "<p>Invalid firearm link.</p>";
-  throw new Error("No ID provided");
+    })
+    .catch(function() {
+      document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
+    });
 }
-
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(csv => {
-    const rows = csv.trim().split("\n").slice(1).map(r => r.split(","));
-    const gun = rows.find(r => r[0].trim() === id.trim());
-
-    if (!gun) {
-      document.getElementById("gun").innerHTML = "<p>Firearm not found.</p>";
-      return;
-    }
-
-    const name    = gun[1];
-    const price   = gun[2];
-    const status  = gun[3];
-    const details = gun[4];
-    const folderURL = gun[5];
-
-    if (!folderURL) {
-      document.getElementById("gun").innerHTML = `
-        <h1>${name}</h1>
-        <p class="price">$${price}</p>
-        <p>${details}</p>
-        <p><em>No photos available.</em></p>
-      `;
-      return;
-    }
-
-    const folderIdMatch = folderURL.match(/[-\w]{25,}/);
-    if (!folderIdMatch) {
-      document.getElementById("gun").innerHTML = "<p>Invalid photo folder link.</p>";
-      return;
-    }
-
-    const folderId = folderIdMatch[0];
-
-    fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name)&key=${API_KEY}`
-    )
-      .then(res => res.json())
-      .then(data => {
-        const images = (data.files || [])
-          .map(f => `<img src="https://drive.google.com/uc?id=${f.id}" style="max-width:300px;margin:10px;">`)
-          .join("");
-
-        let badge = "";
-        if (status && status !== "AVAILABLE") {
-          badge = `<div class="badge ${status.toLowerCase()}">${status}</div>`;
-        }
-
-        document.getElementById("gun").innerHTML = `
-          <h1>${name}</h1>
-          ${badge}
-          <p class="price">$${price}</p>
-          <p>${details}</p>
-          <div>${images || "<em>No photos found in folder.</em>"}</div>
-        `;
-      })
-      .catch(() => {
-        document.getElementById("gun").innerHTML = "<p>Error loading photos.</p>";
-      });
-  })
-  .catch(() => {
-    document.getElementById("gun").innerHTML = "<p>Error loading firearm.</p>";
-  });
 </script>
-
-</body>
-</html>
-
 
 </body>
 </html>
