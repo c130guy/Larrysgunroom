@@ -82,9 +82,7 @@ if (!id) {
         if (data.files && data.files.length) {
           data.files.forEach(function(f) {
             imagesHTML +=
-              "<img src='https://drive.google.com/uc?id=" +
-              f.id +
-              "' style='max-width:300px;margin:10px;'>";
+              "<img src='https://drive.google.com/uc?export=view&id=" + f.id + "' style='max-width:300px;margin:10px;'>";
           });
         } else {
           imagesHTML = "<em>No photos found in folder.</em>";
