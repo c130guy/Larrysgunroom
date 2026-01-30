@@ -61,33 +61,34 @@ fetch(sheetURL)
     const container = document.getElementById("inventory");
     container.innerHTML = "";
 
-    rows.forEach(line => {
-      const cols = line.split(",");
+rows.forEach(line => {
+  const cols = line.split(",");
 
-      const name   = cols[1];
-      const price  = cols[2];
-      const status = cols[3];
-      const image = cols[6];
-      const slug   = cols[7];
+  const id     = cols[0];
+  const name   = cols[1];
+  const price  = cols[2];
+  const status = cols[3];
+  const image  = cols[6];
 
-      if (!name || status !== "AVAILABLE") return;
+  if (!name || status !== "AVAILABLE") return;
 
-      const url = slug ? `/gun.html?slug=${slug}` : "#";
+  const url = `/gun.html?id=${id}`;
 
-      const card = document.createElement("a");
-      card.href = url;
-      card.className = "item-card";
+  const card = document.createElement("a");
+  card.href = url;
+  card.className = "item-card";
 
-      card.innerHTML = `
-        <div class="image-wrapper">
-          <img src="${image}" alt="${name}">
-        </div>
-        <h3>${name}</h3>
-        <p class="price">$${price}</p>
-      `;
+  card.innerHTML = `
+    <div class="image-wrapper">
+      <img src="${image}" alt="${name}">
+    </div>
+    <h3>${name}</h3>
+    <p class="price">$${price}</p>
+  `;
 
-      container.appendChild(card);
-    });
+  container.appendChild(card);
+});
+
   })
   .catch(err => console.error("Inventory CSV error:", err));
 </script>
