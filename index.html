@@ -86,10 +86,7 @@ fetch(SHEET_URL)
           var folderId = match[0];
 
           fetch(
-            "https://www.googleapis.com/drive/v3/files?q='" +
-            folderId +
-            "'+in+parents&pageSize=1&fields=files(id)&key=" +
-            API_KEY
+            "https://www.googleapis.com/drive/v3/files?q='FOLDER_ID'+in+parents+and+mimeType+contains+'image/'&orderBy=name&pageSize=1&fields=files(id,name)&key=API_KEY
           )
           .then(function(res) { return res.json(); })
           .then(function(data) {
