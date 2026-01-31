@@ -5,28 +5,6 @@
   <title>Larry’s Gun Room | Beresford, SD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* SOLD visual treatment */
-    .item-card.sold {
-      opacity: 0.5;
-      pointer-events: auto;
-    }
-    .sold-ribbon {
-      position: absolute;
-      top: 10px;
-      left: -5px;
-      background: #b00020;
-      color: white;
-      padding: 5px 12px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      transform: rotate(-5deg);
-      z-index: 2;
-    }
-    .image-wrapper {
-      position: relative;
-    }
-  </style>
 </head>
 <body>
 
@@ -49,7 +27,7 @@
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
-const API_KEY = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+const API_KEY = "PASTE_YOUR_GOOGLE_DRIVE_API_KEY_HERE";
 
 /* =============== DO NOT EDIT BELOW =============== */
 
@@ -70,19 +48,14 @@ fetch(SHEET_URL)
       const status = (cols[3] || "").toUpperCase();
       const folder = cols[5] || "";
 
-      if (!id || !name) return;
+      if (!id || !name || status !== "AVAILABLE") return;
 
       const card = document.createElement("a");
       card.className = "item-card";
       card.href = `/gun.html?id=${id}`;
 
-      if (status === "SOLD") {
-        card.classList.add("sold");
-      }
-
       card.innerHTML = `
         <div class="image-wrapper">
-          ${status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}
           <div class="no-image">No Photo</div>
         </div>
         <h3>${name}</h3>
@@ -112,7 +85,6 @@ fetch(SHEET_URL)
         if (data.files && data.files.length) {
           const imgId = data.files[0].id;
           card.querySelector(".image-wrapper").innerHTML =
-            `${status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}` +
             `<img src="https://drive.google.com/thumbnail?id=${imgId}&sz=w400">`;
         }
       });
@@ -130,6 +102,7 @@ fetch(SHEET_URL)
 
 </body>
 </html>
+
 
 
 
