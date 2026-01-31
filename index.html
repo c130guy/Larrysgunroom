@@ -74,52 +74,6 @@ fetch(SHEET_URL)
 
       if (!id || !name || status !== "AVAILABLE") return;
 
-      var card = document.createElement("a");
-      card.href = "/gun.html?id=" + id;
-      card.className = "item-card";
-
-      card.innerHTML =
-        "<div class='image-wrapper'><div class='no-image'>No Photo</div></div>" +
-        "<h3>" + name + "</h3>" +
-        "<p class='price'>$" + price + "</p>";
-
-      container.appendChild(card);
-
-      if (!folderURL) return;
-
-      var match = folderURL.match(/[-\\w]{25,}/);
-      if (!match) return;
-
-      var folderId = match[0];
-
-      fetch(
-        "https://www.googleapis.com/drive/v3/files?" +
-        "q='" + folderId + "' in parents and mimeType contains 'image/'" +
-        "&orderBy=name" +
-        "&pageSize=1" +
-        "&fields=files(id,name)" +
-        "&key=" + API_KEY
-      )
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.files && data.files.length) {
-          var fileId = data.files[0].id;
-          card.querySelector(".image-wrapper").innerHTML =
-            "<img src='https://drive.google.com/thumbnail?id=" +
-            fileId +
-            "&sz=w400'>";
-        }
-      });
-
-    });
-  })
-  .catch(function() {
-    document.getElementById("inventory").innerHTML =
-      "<p>Error loading inventory.</p>";
-  });
-</script>
-
-</body>
-</html>
+      var card = document.createElement("a")
 
 
