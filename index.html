@@ -9,71 +9,97 @@
 <body>
 
 <header class="hero">
-  <div class="hero-content">
-    <h1>Larry’s Gun Room</h1>
-    <p>Collecting, Dealing & Trading Since 1969</p>
-  </div>
+  <h1>Larry’s Gun Room</h1>
+  <p>Collecting, Dealing & Trading Since 1969</p>
 </header>
 
-<hr class="divider">
-
-<section>
-  <h2>Business Information</h2>
-  <p><strong>GUN ROOM, LLC</strong></p>
-  <p>105 North 8th Street<br>Beresford, SD 57004</p>
-  <p><strong>Phone:</strong> (605) 763-5090</p>
-  <p><strong>Phone Hours:</strong> 8:00 AM – 10:00 PM (CST)</p>
+<section id="inventory" class="inventory-grid">
+  <p>Loading inventory…</p>
 </section>
-
-<section>
-  <h2>About Us</h2>
-  <p>
-    Larry’s Gun Room has been buying, selling, and trading fine firearms since 1969.
-    We specialize in collectible Winchesters, antiques, and quality firearms.
-  </p>
-</section>
-
-<section id="inventory" class="inventory-grid"></section>
 
 <footer>
   <p>© Larry’s Gun Room, LLC — Beresford, South Dakota</p>
 </footer>
 
 <script>
-/* ==================================================
-   CONFIG — EDIT API KEY ONLY
-   ================================================== */
+/* ================= CONFIG ================= */
 
-var SHEET_URL =
+const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
-var API_KEY = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+const API_KEY = "PASTE_YOUR_GOOGLE_DRIVE_API_KEY_HERE";
 
-/* ==================================================
-   DO NOT EDIT BELOW THIS LINE
-   ================================================== */
+/* =============== DO NOT EDIT BELOW =============== */
 
 fetch(SHEET_URL)
-  .then(function(res) { return res.text(); })
-  .then(function(csv) {
-
-    var rows = csv.trim().split("\n").slice(1).map(function(r) {
-      return r.split(",");
-    });
-
-    var container = document.getElementById("inventory");
+  .then(res => res.text())
+  .then(csv => {
+    const lines = csv.trim().split("\n").slice(1);
+    const container = document.getElementById("inventory");
     container.innerHTML = "";
 
-    rows.forEach(function(row) {
+    lines.forEach(line => {
+      const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
 
-      var id     = row[0];
-      var name   = row[1];
-      var price  = row[2];
-      var status = row[3];
-      var folderURL = row[5];
+      const id     = cols[0];
+      const name   = cols[1];
+      const price  = cols[2];
+      const status = (cols[3] || "").toUpperCase();
+      const folder = cols[5] || "";
 
-      if (!id || !name || status !== "AVAILABLE") return;
+      if (!id || !name) return;
 
-      var card = document.createElement("a")
+      if (status !== "AVAILABLE") return;
+
+      const card = document.createElement("a");
+      card.className = "item-card";
+      card.href = `/gun.html?id=${id}`;
+
+      card.innerHTML = `
+        <div class="image-wrapper">
+          <div class="no-image">No Photo</div>
+        </div>
+        <h3>${name}</h3>
+        <p class="price">$${price}</p>
+      `;
+
+      container.appendChild(card);
+
+      const match = folder.match(/[-\w]{25,}/);
+      if (!match) return;
+
+      const folderId = match[0];
+
+      fetch(
+        `https://www.googleapis.com/drive/v3/files` +
+        `?q='${folderId}' in parents` +
+        `&orderBy=name` +
+        `&pageSize=1` +
+        `&fields=files(id)` +
+        `&key=${API_KEY}`
+      )
+      .then(r => r.json())
+      .then(data => {
+        if (data.files && data.files.length) {
+          const imgId = data.files[0].id;
+          card.querySelector(".image-wrapper").innerHTML =
+            `<img src="https://drive.google.com/thumbnail?id=${imgId}&sz=w400">`;
+        }
+      });
+    });
+
+    if (!container.children.length) {
+      container.innerHTML = "<p>No inventory available.</p>";
+    }
+  })
+  .catch(() => {
+    document.getElementById("inventory").innerHTML =
+      "<p>Error loading inventory.</p>";
+  });
+</script>
+
+</body>
+</html>
+
 
 
