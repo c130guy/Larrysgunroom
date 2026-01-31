@@ -31,18 +31,6 @@
     Larry’s Gun Room has been buying, selling, and trading fine firearms since 1969.
     We specialize in collectible Winchesters, antiques, and quality firearms.
   </p>
-  <p>
-    Satisfaction guaranteed with a 3-day inspection period. All firearms should be
-    inspected by a competent gunsmith before firing.
-  </p>
-</section>
-
-<section>
-  <h2>Current Catalog</h2>
-  <p>View or download our latest Fall Catalog:</p>
-  <a class="button" href="catalog.pdf" target="_blank">
-    📄 View Fall Catalog (PDF)
-  </a>
 </section>
 
 <section id="inventory" class="inventory-grid"></section>
@@ -52,46 +40,84 @@
 </footer>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
+/* ================================
+   CONFIG — EDIT API KEY ONLY
+   ================================ */
 
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(csv => {
-    const rows = csv.trim().split("\n").slice(1);
-    const container = document.getElementById("inventory");
+var SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
+
+var API_KEY = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+
+/* ================================
+   DO NOT EDIT BELOW THIS LINE
+   ================================ */
+
+fetch(SHEET_URL)
+  .then(function(res) { return res.text(); })
+  .then(function(csv) {
+
+    var rows = csv.trim().split("\n").slice(1).map(function(r) {
+      return r.split(",");
+    });
+
+    var container = document.getElementById("inventory");
     container.innerHTML = "";
 
-rows.forEach(line => {
-  const cols = line.split(",");
+    rows.forEach(function(row) {
 
-  const id     = cols[0];
-  const name   = cols[1];
-  const price  = cols[2];
-  const status = cols[3];
-  const image  = cols[6];
+      var id     = row[0];
+      var name   = row[1];
+      var price  = row[2];
+      var status = row[3];
+      var folderURL = row[5];
 
-  if (!name || status !== "AVAILABLE") return;
+      if (!id || !name || status !== "AVAILABLE") return;
 
-  const url = `/gun.html?id=${id}`;
+      var card = document.createElement("a");
+      card.href = "/gun.html?id=" + id;
+      card.className = "item-card";
 
-  const card = document.createElement("a");
-  card.href = url;
-  card.className = "item-card";
+      var imgHTML = "<div class='image-wrapper'><div class='no-image'>No Photo</div></div>";
 
-  card.innerHTML = `
-    <div class="image-wrapper">
-      <img src="${image}" alt="${name}">
-    </div>
-    <h3>${name}</h3>
-    <p class="price">$${price}</p>
-  `;
+      if (folderURL) {
+        var match = folderURL.match(/[-\w]{25,}/);
+        if (match) {
+          var folderId = match[0];
 
-  container.appendChild(card);
-});
+          fetch(
+            "https://www.googleapis.com/drive/v3/files?q='" +
+            folderId +
+            "'+in+parents&pageSize=1&fields=files(id)&key=" +
+            API_KEY
+          )
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.files && data.files.length) {
+              var fileId = data.files[0].id;
+              card.querySelector(".image-wrapper").innerHTML =
+                "<img src='https://drive.google.com/thumbnail?id=" +
+                fileId +
+                "&sz=w400'>";
+            }
+          });
+        }
+      }
 
+      card.innerHTML =
+        imgHTML +
+        "<h3>" + name + "</h3>" +
+        "<p class='price'>$" + price + "</p>";
+
+      container.appendChild(card);
+    });
   })
-  .catch(err => console.error("Inventory CSV error:", err));
+  .catch(function() {
+    document.getElementById("inventory").innerHTML =
+      "<p>Error loading inventory.</p>";
+  });
 </script>
-  
+
 </body>
 </html>
+
