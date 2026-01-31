@@ -25,6 +25,22 @@
     .image-wrapper {
       position: relative;
     }
+
+    /* Catalog button */
+    .catalog-button {
+      display: inline-block;
+      margin: 30px 0;
+      padding: 14px 22px;
+      background: #1f2937;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+    .catalog-button:hover {
+      background: #374151;
+    }
   </style>
 </head>
 <body>
@@ -57,6 +73,14 @@
   </p>
 </section>
 
+<!-- ✅ CATALOG BUTTON -->
+<section>
+  <a class="catalog-button" href="/catalog.pdf" target="_blank">
+    📄 View Full Catalog (PDF)
+  </a>
+</section>
+
+<!-- INVENTORY -->
 <section id="inventory" class="inventory-grid">
   <p>Loading inventory…</p>
 </section>
@@ -140,6 +164,7 @@ fetch(SHEET_URL)
 
 </body>
 </html>
+
 
 
 
