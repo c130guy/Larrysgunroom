@@ -7,17 +7,6 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 30px 0;
-    }
-    .controls input,
-    .controls select {
-      padding: 8px;
-      font-size: 1rem;
-    }
     .item-card.sold {
       opacity: 0.5;
     }
@@ -68,15 +57,6 @@
   </p>
 </section>
 
-<section class="controls">
-  <input type="text" id="search" placeholder="Search firearms…">
-  <select id="sort">
-    <option value="default">Sort: Default</option>
-    <option value="price-asc">Price: Low → High</option>
-    <option value="price-desc">Price: High → Low</option>
-  </select>
-</section>
-
 <section id="inventory" class="inventory-grid">
   <p>Loading inventory…</p>
 </section>
@@ -91,115 +71,71 @@
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQABes-BmlnfiQ4tB8tWX6Z0MNRv_rhDJjc4qomYnmuCy-xgJdt81dReyVPT7ZGAu5Mclw_sgZDZ_a/pub?gid=0&single=true&output=csv";
 
-const API_KEY = "AIzaSyBF6oEWQAiqJcKyFfJFUJelQgOldL1ZWQg";
+const API_KEY = "PASTE_YOUR_GOOGLE_DRIVE_API_KEY_HERE";
 
 /* =============== DO NOT EDIT BELOW =============== */
-
-let inventoryData = [];
 
 fetch(SHEET_URL)
   .then(res => res.text())
   .then(csv => {
     const rows = csv.trim().split("\n").slice(1);
+    const container = document.getElementById("inventory");
+    container.innerHTML = "";
 
-    inventoryData = rows.map(row => {
-      const c = row.split(",").map(x => x.trim().replace(/^"|"$/g, ""));
-      return {
-        id: c[0],
-        name: c[1],
-        price: parseFloat(c[2]) || 0,
-        status: (c[3] || "").toUpperCase(),
-        folder: c[5] || ""
-      };
-    });
+    rows.forEach(row => {
+      const cols = row.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
 
-    renderInventory(inventoryData);
-  });
+      const id     = cols[0];
+      const name   = cols[1];
+      const price  = cols[2];
+      const status = (cols[3] || "").toUpperCase();
+      const folder = cols[5] || "";
 
-function renderInventory(data) {
-  const container = document.getElementById("inventory");
-  container.innerHTML = "";
+      if (!id || !name) return;
 
-  data.forEach(item => {
-    if (!item.id || !item.name) return;
+      const card = document.createElement("a");
+      card.className = "item-card";
+      card.href = `/gun.html?id=${id}`;
 
-    const card = document.createElement("a");
-    card.className = "item-card";
-    card.href = `/gun.html?id=${item.id}`;
-
-    if (item.status === "SOLD") {
-      card.classList.add("sold");
-    }
-
-    card.innerHTML = `
-      <div class="image-wrapper">
-        ${item.status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}
-        <div class="no-image">No Photo</div>
-      </div>
-      <h3>${item.name}</h3>
-      <p class="price">$${item.price}</p>
-    `;
-
-    container.appendChild(card);
-
-    const match = item.folder.match(/[-\w]{25,}/);
-    if (!match) return;
-
-    fetch(
-      `https://www.googleapis.com/drive/v3/files` +
-      `?q='${match[0]}' in parents` +
-      `&spaces=drive` +
-      `&supportsAllDrives=true` +
-      `&includeItemsFromAllDrives=true` +
-      `&orderBy=name` +
-      `&pageSize=1` +
-      `&fields=files(id)` +
-      `&key=${API_KEY}`
-    )
-    .then(r => r.json())
-    .then(d => {
-      if (d.files && d.files.length) {
-        card.querySelector(".image-wrapper").innerHTML =
-          `${item.status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}` +
-          `<img src="https://drive.google.com/thumbnail?id=${d.files[0].id}&sz=w400">`;
+      if (status === "SOLD") {
+        card.classList.add("sold");
       }
+
+      card.innerHTML = `
+        <div class="image-wrapper">
+          ${status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}
+          <div class="no-image">No Photo</div>
+        </div>
+        <h3>${name}</h3>
+        <p class="price">$${price}</p>
+      `;
+
+      container.appendChild(card);
+
+      const match = folder.match(/[-\w]{25,}/);
+      if (!match) return;
+
+      fetch(
+        `https://www.googleapis.com/drive/v3/files` +
+        `?q='${match[0]}' in parents` +
+        `&spaces=drive` +
+        `&supportsAllDrives=true` +
+        `&includeItemsFromAllDrives=true` +
+        `&orderBy=name` +
+        `&pageSize=1` +
+        `&fields=files(id)` +
+        `&key=${API_KEY}`
+      )
+      .then(r => r.json())
+      .then(d => {
+        if (d.files && d.files.length) {
+          card.querySelector(".image-wrapper").innerHTML =
+            `${status === "SOLD" ? "<div class='sold-ribbon'>SOLD</div>" : ""}` +
+            `<img src="https://drive.google.com/thumbnail?id=${d.files[0].id}&sz=w400">`;
+        }
+      });
     });
   });
-
-  if (!container.children.length) {
-    container.innerHTML = "<p>No matching firearms.</p>";
-  }
-}
-
-/* Search */
-document.getElementById("search").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  applySort(
-    inventoryData.filter(i => i.name.toLowerCase().includes(q))
-  );
-});
-
-/* Sort */
-document.getElementById("sort").addEventListener("change", () => {
-  applySort(getFiltered());
-});
-
-function getFiltered() {
-  const q = document.getElementById("search").value.toLowerCase();
-  return inventoryData.filter(i =>
-    i.name.toLowerCase().includes(q)
-  );
-}
-
-function applySort(data) {
-  const mode = document.getElementById("sort").value;
-  let sorted = [...data];
-
-  if (mode === "price-asc") sorted.sort((a,b) => a.price - b.price);
-  if (mode === "price-desc") sorted.sort((a,b) => b.price - a.price);
-
-  renderInventory(sorted);
-}
 </script>
 
 </body>
